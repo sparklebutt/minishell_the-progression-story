@@ -6,7 +6,7 @@
 #    By: vkettune <vkettune@student.hive.fi>        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/21 12:56:28 by vkettune          #+#    #+#              #
-#    Updated: 2024/05/24 11:30:33 by araveala         ###   ########.fr        #
+#    Updated: 2024/06/06 15:46:12 by araveala         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -36,7 +36,9 @@ LIBS = $(READLINE) $(LIBFT)
 READLINE = -lreadline  -L ~/.brew/opt/readline/lib
 LIBFT = libft/libft.a
 
-FILES = main.c init.c signals.c args.c env.c cmds.c handle_env.c list_creation.c  parsing.c free_things.c ft_split_adv.c
+FILES = main.c init.c signals.c args.c cmds.c \
+	handle_env.c list_creation.c parsing_not.c parsers.c export_parsing.c free_things.c \
+	ft_split_adv.c handle_line.c list_search.c forking.c 
 
 SRCS = $(addprefix srcs/, $(FILES))
 OBJS = $(addprefix objs/, $(FILES:.c=.o))
@@ -74,5 +76,10 @@ fclean: clean
 	
 re: fclean all
 	@echo "$(GREEN)Sucessfully cleaned and rebuilt everything$(X)"
+
+test: # remove this
+	@mkdir -p example/ example/example2 example/example2/example3
+	@touch example/file1 example/file2 example/example2/file3 example/example2/file4 example/example2/example3/file5
+	@echo "$(DARK_MAGENTA)- - - - - test folders and files created - - - - - -\n$(X)"
 
 .PHONY: all clean fclean re
