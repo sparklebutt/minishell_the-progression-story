@@ -3,59 +3,49 @@
 /*                                                        :::      ::::::::   */
 /*   list_creation.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: araveala <araveala@student.hive.fi>        +#+  +:+       +#+        */
+/*   By: vkettune <vkettune@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 13:12:21 by araveala          #+#    #+#             */
-/*   Updated: 2024/05/22 16:57:07 by araveala         ###   ########.fr       */
+/*   Updated: 2024/06/08 17:19:00 by vkettune         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
 #include "minishell.h"
 
-t_env *add_new_node(char *value_in, char *key_in)
+int insert_node(t_env **env_lst, char *key_name, char *value)
 {
-	t_env *new;
+    t_env  *new_node;
+    t_env  *tmp;
 
-	new = (t_env *)malloc(sizeof(t_env));
-	if (!new)
-	{
-		printf("new node creation failure\n");//
-		return (0);
-	}
-	new->next = NULL;
-	new->value = value_in;
-	new->key  = key_in;
-	new->prev = NULL;
-	return (new);
+    new_node = malloc(sizeof(t_env));
+    if (new_node == NULL)
+        return (-1);
+    new_node->key = key_name;
+    new_node->value = value;
+    new_node->next = NULL;
+    if (*env_lst == NULL)
+    {
+        *env_lst = new_node;
+        return (1);
+    }
+    tmp = *env_lst;
+    while (tmp->next != NULL)
+        tmp = tmp->next;
+    tmp->next = new_node;
+    return (1);
 }
 
-void addnode(t_env **env_lst, t_env *node) //to end
-{
-	t_env *temp;
+// void	remove_node(t_env *node)
+// {
+// 	// for unset 
+// }
 
-	temp = (*env_lst);
-	while ((*env_lst)->next != NULL)
-		(*env_lst) = (*env_lst)->next;
-	if ((*env_lst)->next == NULL)
+void	free_nodes(t_env *node)
+{
+	while ((*node).next != NULL)
 	{
-		(*env_lst)->next = (&(*node));
-		(*node).prev = *env_lst;
-		(*node).next = NULL; 
-		env_lst = &temp; //return pointer 
+		free(node->value);
+		free(node->key);
+		node = node->next;
 	}
-}
-
-/*void	remove_node()
-{
-	for unset 
-	}*/
-
-void	free_nodes(t_env *nodes)
-{
-	while ((*nodes).next != NULL)
-	{
-		free(nodes->value);
-		free(nodes->key);
-		free(nodes);
-		nodes = nodes->next;
-	} 
 }

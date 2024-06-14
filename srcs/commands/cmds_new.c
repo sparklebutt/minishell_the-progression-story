@@ -6,7 +6,7 @@
 /*   By: vkettune <vkettune@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 09:28:04 by vkettune          #+#    #+#             */
-/*   Updated: 2024/06/08 18:34:42 by vkettune         ###   ########.fr       */
+/*   Updated: 2024/06/08 14:51:50 by vkettune         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,9 +16,12 @@ int ft_pwd(t_data *data)
 {
 	char *temp;
 
+	// ft_printf("%s\n", data->path);
+	// trash_dir = "$HOME/.Trash"; // a guess, probably doesn't work
 	temp = getcwd(NULL, 0);
 
-	if (temp != NULL)
+	// if (temp == NULL || ft_strncmp(temp, trash_dir, ft_strlen(trash_dir) + 1) == 0)
+	if (temp != NULL) //remove
 	{
 		free(data->path);
 		data->path = temp;
@@ -30,46 +33,52 @@ int ft_pwd(t_data *data)
 	}
 	ft_printf("%s\n", data->path);
 	free(temp);
+	// free(data->path);
 	return (0);
 }
 
-void ft_cd(t_data *data, t_env *envs)
+void ft_cd(t_data *data, t_env *envs, char *rl)
 {
 	char *temp;
 	char *temp2;
 	t_tokens *tokens;
 	(void)envs;
+	(void)rl;
 
 	tokens = data->tokens;
+	ft_printf("old data->path: %s\n", data->path);
 	if (ft_strncmp(tokens->args[0], "cd", 3) == 0 && tokens->args[1] == NULL)
 	{
 		find_passage(data, "HOME", 2);
 		if (chdir(data->tmp->filename) == 0)
 		{
-			ft_printf("chdir success\n"); // remove
 			free(data->tmp->filename);
-			data->path = getcwd(NULL, 0);
 			free(data->path);
+			data->path = getcwd(NULL, 0);
 		}
 		return ;
 	}
-	free(data->path);
+	free(tokens->args[0]); // idk how this fixes leaks
 	temp = getcwd(NULL, 0);
 	if (temp != NULL)
 		data->path = temp;
 	if (ft_strncmp(tokens->args[1], "/", 1) != 0)
 	{
-		// ft_printf("no / at the start of path\n"); //remove
+		ft_printf("no / at the start of path\n"); //remove
 		temp2 = ft_strjoin("/", tokens->args[1]);
+		ft_printf("temp2: %s\n", temp2); //remove
 	}
 	else
 	{
-		// ft_printf("slash in path\n"); //remove
+		ft_printf("slash in path\n"); //remove
 		temp2 = ft_strdup(tokens->args[1]);
+		ft_printf("temp2: %s\n", temp2); //remove
 	}
+	free(tokens->args[1]); // idk how this fixes leaks
 	free(data->path); // idk how this fixes leaks, and actually works
 	temp = ft_strjoin(data->path, temp2);
 	free(temp2);
+	ft_printf("temp: %s\n", temp); //remove
 	if (chdir(temp) == 0)
 	{
 		data->path = getcwd(NULL, 0);
@@ -145,20 +154,10 @@ void	handle_quotes(char **str)
 	*str = temp;
 }
 
-int ft_exit(char *cmd, t_tokens *tokens) // this should now be pretty good
+int ft_exit(char *cmd)
 {
-	ft_printf("exit\n");
-	if (tokens->array_count > 1)
-	{
-		if (atoi(tokens->args[1]) == 0)
-			cmd_error(cmd, tokens->args[1], "numeric argument required\n");
-		else if (tokens->array_count > 2)
-			cmd_error(cmd, NULL, "exit: too many arguments\n");
-		free(cmd);
-		exit(0);
-	}
-	// add into envs $?
 	free(cmd);
+	ft_printf("exit\n");
 	exit(0);
 	return (1);
 }
@@ -195,9 +194,9 @@ void	ft_export(t_data *data)
 	tokens = data->tokens;
 	env = data->env;
 	if (tokens->args[1] == NULL)
-		ft_printf("no args\n");
+		printf("no args\n");
 	if (data->tokens->array_count == 1)
-		ft_printf("print env in alphabetical order\n");
+		printf("print env in alphabetical order\n");
 	while (i < data->tokens->array_count)
 	{
 		handle_arg(data, i, data->tokens);
@@ -226,7 +225,7 @@ void handle_arg(t_data *data, int arg_i, t_tokens *tokens)
 		if (ft_strncmp(env->key, key, ft_strlen(key)) == 0)
 		{
 			ft_printf("key exists\n");
-			free(env->value);
+			free(env->value); // if issue, use free_str
 			env->value = find_value(arg);
 			free(key);
 			return ;
